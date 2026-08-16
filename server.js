@@ -5,12 +5,17 @@ const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
+// Configuración de Socket.IO con CORS activado por si se requiere
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname))); // o path.join(__dirname, 'public') si usas carpeta public
 
-// Estado inicial del contador
 let deathState = {
   p1: { deaths: 0, username: 'Steve' },
   p2: { enabled: false, deaths: 0, username: 'Alex' },
@@ -20,19 +25,25 @@ let deathState = {
   animation: 'bounce'
 };
 
-// Conexión por WebSockets
 io.on('connection', (socket) => {
-  // Enviar estado actual a nuevos overlays que se conecten
+  console.log('Cliente conectado:', socket.id);
+
+  // 1. Enviar el estado actual al cliente que recién se conecta (overlay)
   socket.emit('updateDeathState', deathState);
 
-  // Escuchar actualizaciones desde control.js y retransmitir a overlay.html
+  // 2. Escuchar cambios desde control.html
   socket.on('updateDeathState', (data) => {
     deathState = data;
+    // 3. Retransmitir a TODOS los overlays y controles abiertos
     io.emit('updateDeathState', deathState);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado:', socket.id);
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`Servidor activo en el puerto ${PORT}`);
 });
