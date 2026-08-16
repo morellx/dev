@@ -34,6 +34,10 @@ io.on('connection', (socket) => {
     deathState = data;
     io.emit('updateDeathState', deathState);
   });
+
+  socket.on('update_timer', (data) => {
+    io.emit('sync_timer', data);    
+  });
 });
 
 const PORT = process.env.PORT || 3000;
