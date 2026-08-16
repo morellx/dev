@@ -1,0 +1,447 @@
+:root {
+    --bg-dark: #121214;
+    --bg-card: #18181c;
+    --bg-header: #1a1a1e;
+    --red-accent: #ff3b5c;
+    --red-hover: #e02e4c;
+    --red-glow: rgba(255, 59, 92, 0.25);
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0ab;
+    --border-color: #27272a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar superior */
+.navbar {
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.brand-logo {
+    color: var(--red-accent);
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+    border-bottom: 2px solid var(--red-accent);
+    border-radius: 6px 6px 0 0;
+}
+
+/* Desplegables */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.dropdown:hover .dropbtn {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--bg-card);
+    min-width: 210px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.dropdown-content a {
+    color: var(--text-secondary);
+    padding: 0.6rem 0.8rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-content a i {
+    color: var(--red-accent);
+    width: 16px;
+}
+
+.dropdown-content a:hover, .dropdown-content a.active {
+    background-color: rgba(255, 59, 92, 0.12);
+    color: var(--text-primary);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Estilos de Paginas de Control / Modulos */
+.page-content {
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.app-wrapper {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    align-items: flex-start;
+}
+
+.config-panel, .preview-panel {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.config-panel { flex: 1.2; }
+.preview-panel { flex: 1; }
+
+.config-panel::before, .preview-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red-accent), #ff6b81);
+}
+
+h2, h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group { margin-bottom: 1.2rem; }
+
+label, .sublabel {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+}
+
+.row-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.input-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="number"], select, input[type="text"] {
+    width: 100%;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+input[type="number"]:focus, select:focus, input[type="text"]:focus {
+    border-color: var(--red-accent);
+    box-shadow: 0 0 8px var(--red-glow);
+}
+
+input[type="color"] {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    height: 38px;
+    width: 100%;
+    cursor: pointer;
+    background: none;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+input[type="color"]::-webkit-color-swatch { border-radius: 6px; border: none; }
+
+.btn-control {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-control.primary {
+    background-color: var(--red-accent);
+    color: #ffffff;
+    box-shadow: 0 4px 14px var(--red-glow);
+}
+
+.btn-control.primary:hover {
+    background-color: var(--red-hover);
+    transform: translateY(-2px);
+}
+
+.btn-control.danger {
+    background-color: #27272a;
+    color: var(--text-primary);
+    border: 1px solid #3f3f46;
+}
+
+.btn-control.danger:hover {
+    background-color: #3f3f46;
+    border-color: #52525b;
+    transform: translateY(-2px);
+}
+
+.btn-toggle {
+    background-color: #27272a;
+    color: var(--text-secondary);
+    border: 1px solid #3f3f46;
+    padding: 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-toggle:hover {
+    color: var(--text-primary);
+    background-color: #3f3f46;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 1.2rem 0;
+}
+
+.preview-box {
+    background-color: var(--bg-dark);
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- CONTADOR DE MUERTES MINECRAFT --- */
+
+/* Contenedor principal con fondo negro */
+.death-counter-card {
+    background-color: rgba(17, 17, 17, 0.904) !important; /* Transparente en lugar de #000000 */
+    backdrop-filter: blur(10px); /* Efecto de difuminado */
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    user-select: none;
+}
+
+/* Envoltorio horizontal para jugadores */
+.players-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Unidad de jugador */
+.player-unit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Recuadro negro redondo para la imagen del personaje */
+.mc-head-img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    background-color: transparent; /* Remueve el fondo negro */
+    border-radius: 0; /* Remueve el marco circular */
+    border: none; /* Remueve el borde */
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+
+/* Quita la X manteniendo exacto su espacio */
+.death-separator {
+    visibility: hidden !important;
+    font-size: 1.4rem;
+    font-weight: 900;
+    width: 1ch;
+    display: none !important;
+}
+
+/* Número igualado en tamaño y alineación vertical */
+.death-number {
+    font-size: 64px;
+    line-height: 1;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Divisor cuando se activa P2 */
+.player-divider {
+    color: #444444;
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+/* Texto inferior MUERTES centrado */
+.death-label {
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* --- ANIMACIONES DE MUERTE --- */
+
+.anim-bounce { animation: mcHurt 0.6s ease-in-out; }
+
+@keyframes mcHurt {
+    0% { transform: scale(1) translateY(0); filter: sepia(0); }
+    20% { transform: scale(1.2) translateY(-10px); filter: drop-shadow(0 0 10px red) sepia(1) hue-rotate(-50deg) saturate(5); }
+    40% { transform: scale(0.95) translateY(2px); }
+    60% { transform: scale(1.05) translateY(-4px); }
+    100% { transform: scale(1) translateY(0); filter: none; }
+}
+
+.anim-shake { animation: shake 0.5s ease-in-out; }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-3deg); }
+    40% { transform: translateX(8px) rotate(3deg); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+.anim-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
+.anim-spin { animation: spin 0.6s ease-in-out; }
+
+@keyframes spin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}

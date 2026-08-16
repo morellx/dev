@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Overlay Death Counter OBS</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    body {
+      background: transparent !important;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="death-counter-card">
+    <div class="players-wrapper">
+      
+      <!-- P1 -->
+      <div id="p1Block" class="player-unit">
+        <img id="p1Head" src="https://mc-heads.net/avatar/Steve/64" class="mc-head-img">
+        <span class="death-separator">X</span>
+        <span id="p1Deaths" class="death-number">0</span>
+      </div>
+
+      <div id="p2Divider" class="player-divider" style="display: none;">|</div>
+
+      <!-- P2 -->
+      <div id="p2Block" class="player-unit" style="display: none;">
+        <img id="p2Head" src="https://mc-heads.net/avatar/Alex/64" class="mc-head-img">
+        <span class="death-separator">X</span>
+        <span id="p2Deaths" class="death-number">0</span>
+      </div>
+
+    </div>
+
+    <!-- Texto Inferior -->
+    <div id="deathLabel" class="death-label">MUERTES</div>
+  </div>
+
+  <script>
+    const socket = io();
+    const p1Block = document.getElementById('p1Block');
+    const p1Head = document.getElementById('p1Head');
+    const p1Deaths = document.getElementById('p1Deaths');
+
+    const p2Block = document.getElementById('p2Block');
+    const p2Divider = document.getElementById('p2Divider');
+    const p2Head = document.getElementById('p2Head');
+    const p2Deaths = document.getElementById('p2Deaths');
+
+    const deathLabel = document.getElementById('deathLabel');
+
+    socket.on('updateDeathState', (data) => {
+  // P1
+  p1Deaths.textContent = data.p1.deaths;
+  p1Head.src = `https://mc-heads.net/avatar/${encodeURIComponent(data.p1.username)}/64`;
+  p1Deaths.style.color = data.color;
+  p1Deaths.style.fontSize = `${data.size}px`;
+  p1Head.style.width = `${data.size}px`;
+  p1Head.style.height = `${data.size}px`;
+
+  // P2
+  if (data.p2.enabled) {
+    p2Block.style.display = 'flex';
+    p2Divider.style.display = 'block';
+    p2Deaths.textContent = data.p2.deaths;
+    p2Head.src = `https://mc-heads.net/avatar/${encodeURIComponent(data.p2.username)}/64`;
+    p2Deaths.style.color = data.color;
+    p2Deaths.style.fontSize = `${data.size}px`;
+    p2Head.style.width = `${data.size}px`;
+    p2Head.style.height = `${data.size}px`;
+  } else {
+    p2Block.style.display = 'none';
+    p2Divider.style.display = 'none';
+  }
+
+  deathLabel.textContent = data.labelText;
+  deathLabel.style.color = data.color;
+  deathLabel.style.fontSize = `${Math.max(12, Math.round(data.size * 0.38))}px`;
+
+  // Animaciones
+  if (data.triggerAnimP1) {
+    p1Block.classList.remove('anim-bounce', 'anim-shake', 'anim-pop', 'anim-spin');
+    void p1Block.offsetWidth;
+    p1Block.classList.add(`anim-${data.animation}`);
+  }
+
+  if (data.triggerAnimP2) {
+    p2Block.classList.remove('anim-bounce', 'anim-shake', 'anim-pop', 'anim-spin');
+    void p2Block.offsetWidth;
+    p2Block.classList.add(`anim-${data.animation}`);
+  }
+});
+  </script>
+</body>
+</html>

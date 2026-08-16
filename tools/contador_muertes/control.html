@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Tools | Contador de Muertes</title>
+
+  <!-- Hoja de estilos principal -->
+  <link rel="stylesheet" href="style.css?v=2.0">
+  <!-- CDN para Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Carga de Socket.IO vía CDN -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <!-- Navbar superior -->
+  <header class="navbar">
+    <div class="nav-left">
+      <a href="../../index.html" class="brand-logo">
+        <i class="fa-brands fa-twitch"></i> Morell Tools
+      </a>
+      <nav class="nav-menu">
+        <a href="../../index.html" class="nav-link">Inicio</a>
+        
+        <!-- Desplegable Tools -->
+        <div class="dropdown">
+          <button class="dropbtn">
+            Tools <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="dropdown-content">
+            <a href="../timer/control.html"><i class="fa-solid fa-stopwatch"></i> Timer</a>
+            <a href="../contador_muertes/control.html" class="active"><i class="fa-solid fa-skull"></i> Contador de muertes</a>
+          </div>
+        </div>
+
+        <a href="/emotes/emotes_canal/" class="nav-link">Emotes del canal
+        <a href="../../multitwitch/" class="nav-link">Multi Twitch</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Panel Principal de Control -->
+  <main class="page-content">
+    <div class="app-wrapper">
+      
+      <!-- Panel de Control -->
+      <section class="config-panel">
+        <h2>Contador de Muertes</h2>
+        <p class="subtitle">Gestiona el número de muertes en tiempo real para OBS</p>
+
+        <!-- SECCIÓN JUGADOR 1 -->
+        <div class="form-group">
+          <label style="color: var(--red-accent);">JUGADOR 1</label>
+          <div class="row">
+            <div class="input-col">
+              <span class="sublabel">PERSONAJE</span>
+              <select id="p1SkinSelect">
+                <option value="Steve">Steve</option>
+                <option value="Alex">Alex</option>
+                <option value="custom">Nombre Custom</option>
+              </select>
+            </div>
+            <div class="input-col" id="p1CustomGroup" style="display: none;">
+              <span class="sublabel">USUARIO MINECRAFT</span>
+              <input type="text" id="p1Username" placeholder="Ej: Vegetta777" value="Steve">
+            </div>
+          </div>
+          <div class="row" style="margin-top: 8px;">
+            <button type="button" id="btnP1Sub" class="btn-control danger">-1 P1</button>
+            <button type="button" id="btnP1Add" class="btn-control primary">+1 MUERTE P1</button>
+          </div>
+        </div>
+
+        <!-- CHECKBOX SEGUNDO JUGADOR -->
+        <div class="form-group row-toggle" style="background: var(--bg-dark); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+          <label for="enableP2" style="margin: 0; cursor: pointer;">👥 Añadir Segundo Jugador (Dúo)</label>
+          <input type="checkbox" id="enableP2">
+        </div>
+
+        <!-- SECCIÓN JUGADOR 2 (Oculto por defecto) -->
+        <div class="form-group" id="p2ConfigGroup" style="display: none;">
+          <label style="color: var(--red-accent);">JUGADOR 2</label>
+          <div class="row">
+            <div class="input-col">
+              <span class="sublabel">PERSONAJE</span>
+              <select id="p2SkinSelect">
+                <option value="Alex">Alex</option>
+                <option value="Steve">Steve</option>
+                <option value="custom">Nombre Custom</option>
+              </select>
+            </div>
+            <div class="input-col" id="p2CustomGroup" style="display: none;">
+              <span class="sublabel">USUARIO MINECRAFT</span>
+              <input type="text" id="p2Username" placeholder="Ej: Rubius" value="Alex">
+            </div>
+          </div>
+          <div class="row" style="margin-top: 8px;">
+            <button type="button" id="btnP2Sub" class="btn-control danger">-1 P2</button>
+            <button type="button" id="btnP2Add" class="btn-control primary">+1 MUERTE P2</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button type="button" id="btnResetAll" class="btn-control danger" style="width: 100%;">↻ Reiniciar Todo a 0</button>
+        </div>
+
+        <hr>
+
+        <!-- Personalización Visual -->
+        <div class="form-group">
+          <label>PERSONALIZACIÓN VISUAL</label>
+          <div class="row">
+            <div class="input-col">
+              <span class="sublabel">TEXTO INFERIOR</span>
+              <input type="text" id="labelText" value="MUERTES">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">COLOR</span>
+              <input type="color" id="textColor" value="#ffffff">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">TAMAÑO (PX)</span>
+              <input type="number" id="fontSize" value="38" min="16" max="100">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="animSelect">ANIMACIÓN AL MORIR</label>
+          <div class="row">
+            <select id="animSelect">
+              <option value="bounce">Rebote y parpadeo rojo (Minecraft Hurt)</option>
+              <option value="shake">Sacudida (Shake)</option>
+              <option value="pop">Aumento de tamaño (Pop/Zoom)</option>
+              <option value="spin">Giro de cara (Spin)</option>
+            </select>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Panel de Vista Previa -->
+      <section class="preview-panel">
+        <h3>VISTA PREVIA DE OVERLAY</h3>
+        <p class="subtitle">Así se verá en vivo dentro de OBS</p>
+        <div class="preview-box">
+          
+          <div id="deathCard" class="death-counter-card">
+            <!-- Bloque de Jugadores (Lado a Lado) -->
+            <div class="players-wrapper">
+              
+              <!-- Jugador 1 -->
+              <div id="p1Block" class="player-unit">
+                <img id="p1Head" src="https://mc-heads.net/avatar/Steve/64" alt="Minecraft Head" class="mc-head-img">
+                <span class="death-separator">X</span>
+                <span id="p1Deaths" class="death-number">0</span>
+              </div>
+
+              <!-- Separador entre Jugadores -->
+              <div id="p2Divider" class="player-divider" style="display: none;">|</div>
+
+              <!-- Jugador 2 -->
+              <div id="p2Block" class="player-unit" style="display: none;">
+                <img id="p2Head" src="https://mc-heads.net/avatar/Alex/64" alt="Minecraft Head" class="mc-head-img">
+                <span class="death-separator">X</span>
+                <span id="p2Deaths" class="death-number">0</span>
+              </div>
+
+            </div>
+
+            <!-- Etiqueta Inferior MUERTES -->
+            <div id="deathLabel" class="death-label">MUERTES</div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="control.js"></script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Tools | Emotes</title>
+
+  <!-- Hoja de estilos principal de la web -->
+  <link rel="stylesheet" href="../../style.css">
+  <!-- CDN para Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+body {
+  background-color: var(--bg-dark); 
+  color: #f5f5f7;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+    /* Contenedor principal para centrar el contenido debajo del navbar */
+    .page-content {
+      width: 100%;
+      max-width: 1000px;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Enlace "Regresar al inicio" */
+    .back-nav {
+      width: 100%;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .back-btn {
+      color: #a0a0ab;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    
+
+    .back-btn:hover {
+      color: #ff3b5c;
+      transform: translateX(-4px);
+    }
+
+    /* Header del set de emotes */
+    header.emotes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 28px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .header-title-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .counter {
+      display: inline-block;
+      background-color: #1a1a22;
+      color: #ff3b5c;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1px solid #272732;
+    }
+
+    /* Buscador */
+    .search-container {
+      width: 100%;
+      max-width: 280px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      background-color: #18181c;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-container i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #71717a;
+      font-size: 0.85rem;
+    }
+
+    .search-input::placeholder {
+      color: #71717a;
+    }
+
+    .search-input:focus {
+      border-color: #ff3b5c;
+      box-shadow: 0 0 12px rgba(255, 59, 92, 0.2);
+    }
+
+    /* Grid de tarjetas de emotes */
+    .emotes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .emote-card {
+      background-color: #18181c;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .emote-card:hover {
+      transform: translateY(-3px);
+      border-color: #ff3b5c;
+      box-shadow: 0 8px 20px rgba(255, 59, 92, 0.15);
+    }
+
+    .emote-card img {
+      max-width: 64px;
+      max-height: 64px;
+      object-fit: contain;
+    }
+
+    .emote-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #a0a0ab;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+
+    .status-msg {
+      margin-top: 40px;
+      color: #a0a0ab;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior / Navbar -->
+  <header class="navbar" style="width: 100%;">
+    <div class="nav-left">
+      <a href="../../index.html" class="brand-logo">
+        <i class="fa-brands fa-twitch"></i> Morell Tools
+      </a>
+      <nav class="nav-menu">
+        <a href="../../index.html" class="nav-link">Inicio
+        </a>
+        
+        <!-- Desplegable Tools -->
+        <div class="dropdown">
+          <button class="dropbtn">
+            Tools <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="dropdown-content">
+            <a href="/tools/timer/control.html" class="nav-link"><i class="fa-solid fa-stopwatch"></i>Timer</a>
+            <a href="#"><i class="fa-solid fa-skull"></i> Contador de muertes</a>
+          </div>
+        </div>
+             <a href="#" class="nav-link active">Emotes del canal</a>
+
+        <!-- Enlace Multi Twitch -->
+        <a href="../../multitwitch/" class="nav-link">Multi Twitch</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenido de la página de Emotes -->
+  <div class="page-content">
+    <nav class="back-nav">
+      </nav>
+
+    <header class="emotes-header">
+      <div class="header-title-group">
+        <h1>Emotes del Canal</h1>
+        <div id="counter" class="counter">Cargando set...</div>
+      </div>
+
+      <!-- Buscador -->
+      <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar emote..." disabled>
+      </div>
+    </header>
+
+    <main id="emotesGrid" class="emotes-grid"></main>
+    <div id="status" class="status-msg">Cargando emotes de 7TV...</div>
+  </div>
+
+  <script>
+    const SEVENTV_USER_ID = '01J454CT00000FEMV6VS56MJFQ';
+
+    let allEmotes = [];
+    let totalCapacity = 0;
+
+    async function getActiveEmoteSetId(userId) {
+      const response = await fetch(`https://7tv.io/v3/users/${userId}`);
+      if (!response.ok) throw new Error('No se pudo conectar con 7TV.');
+
+      const data = await response.json();
+      let activeSetId = data.emote_set?.id;
+
+      if (!activeSetId && data.connections) {
+        const twitchConn = data.connections.find(c => c.platform === 'TWITCH');
+        if (twitchConn && twitchConn.emote_set) activeSetId = twitchConn.emote_set.id;
+      }
+
+      if (!activeSetId && data.emote_sets) {
+        const activeInList = data.emote_sets.find(s => s.active || s.flags === 1);
+        activeSetId = activeInList?.id || data.emote_sets[0]?.id;
+      }
+
+      if (!activeSetId) throw new Error('No se encontró un set vinculado.');
+      return activeSetId;
+    }
+
+    async function getEmotesInSet(emoteSetId) {
+      const query = `
+        query GetEmoteSet($id: ObjectID!) {
+          emoteSet(id: $id) {
+            capacity
+            emotes {
+              id
+              name
+            }
+          }
+        }
+      `;
+
+      const response = await fetch('https://7tv.io/v3/gql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables: { id: emoteSetId } })
+      });
+
+      const data = await response.json();
+      if (data.errors) throw new Error(data.errors[0].message);
+
+      const emoteSetData = data.data?.emoteSet || {};
+      return {
+        emotes: emoteSetData.emotes || [],
+        capacity: emoteSetData.capacity || 0
+      };
+    }
+
+    function displayEmotes(emotesToRender) {
+      const grid = document.getElementById('emotesGrid');
+      const status = document.getElementById('status');
+      const counter = document.getElementById('counter');
+
+      if (!emotesToRender || emotesToRender.length === 0) {
+        grid.innerHTML = '';
+        status.style.display = 'block';
+        status.textContent = '❌ No se encontró ningún emote con ese nombre.';
+        counter.textContent = `Coincidencias: [0/${allEmotes.length}]`;
+        return;
+      }
+
+      status.style.display = 'none';
+
+      const isFiltered = emotesToRender.length !== allEmotes.length;
+      counter.textContent = isFiltered
+        ? `Coincidencias: [${emotesToRender.length}/${allEmotes.length}]`
+        : `Set Actual: [${allEmotes.length}/${totalCapacity}]`;
+
+      grid.innerHTML = emotesToRender.map(emote => `
+        <div class="emote-card">
+          <img src="https://cdn.7tv.app/emote/${emote.id}/2x.webp" alt="${emote.name}" loading="lazy">
+          <span class="emote-name">${emote.name}</span>
+        </div>
+      `).join('');
+    }
+
+    function filterEmotes(query) {
+      const cleanQuery = query.trim().toLowerCase();
+      const filtered = allEmotes.filter(emote =>
+        emote.name.toLowerCase().includes(cleanQuery)
+      );
+      displayEmotes(filtered);
+    }
+
+    async function init() {
+      const searchInput = document.getElementById('searchInput');
+      const counter = document.getElementById('counter');
+      const status = document.getElementById('status');
+
+      try {
+        const setId = await getActiveEmoteSetId(SEVENTV_USER_ID);
+        const { emotes, capacity } = await getEmotesInSet(setId);
+
+        allEmotes = emotes;
+        totalCapacity = capacity;
+
+        searchInput.disabled = false;
+        displayEmotes(allEmotes);
+
+        searchInput.addEventListener('input', (e) => filterEmotes(e.target.value));
+
+      } catch (err) {
+        status.textContent = `❌ Error: ${err.message}`;
+        counter.textContent = 'Error al cargar';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

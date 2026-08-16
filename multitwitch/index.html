@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multitwitch sin Reiniciar Stream</title>
+    <!-- Vinculación del archivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="controls">
+        <a href="/" class="home-link">← Regresar al Inicio</a>
+        <span class="brand">Multi Twitch - Fauni (BETA)</span>
+        
+
+        <div class="controls-center">
+            <div class="control-group">
+                <input type="text" id="streamer1" placeholder="Streamer 1">
+                <input type="text" id="streamer2" placeholder="Streamer 2">
+                <button onclick="loadStreams()">Cargar Streams</button>
+            </div>
+
+            <div class="control-group">
+                <select id="chatOption" onchange="applyLayout()">
+                    <option value="none">Sin Chat</option>
+                    <option id="optChat1" value="chat1">Chat 1</option>
+                    <option id="optChat2" value="chat2">Chat 2</option>
+                    <option value="both">Ambos Chats</option>
+                </select>
+
+                <select id="layoutMode" onchange="applyLayout()">
+                    <option value="side">Lado a lado</option>
+                    <option value="stack">Apilado (uno debajo del otro)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="secondary sync-btn" onclick="syncStreams()" title="Presionar si un stream se traba
+o para reiniciar ambos a la vez.">Sincronizar Streams</button>
+    </div>
+
+    <!-- Grid con 4 celdas posibles: s1 (stream1), c1 (chat1), s2 (stream2), c2 (chat2).
+         La disposición exacta (filas/columnas/áreas) se calcula en JS según
+         el modo de vista y qué chats estén activos. -->
+    <div class="layout-container" id="layoutContainer">
+        <div class="stream-block" id="block1">
+            <iframe id="player1" class="stream-iframe" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+
+        <iframe id="chat1" class="chat-iframe"></iframe>
+
+        <div class="stream-block" id="block2">
+            <iframe id="player2" class="stream-iframe" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+
+        <iframe id="chat2" class="chat-iframe"></iframe>
+    </div>
+
+    <!-- Vinculación del archivo JS externo -->
+    <script src="script.js"></script>
+</body>
+</html>

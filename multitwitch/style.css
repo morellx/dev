@@ -1,0 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0e0e10;
+    color: white;
+    font-family: sans-serif;
+    overflow: hidden;
+}
+
+.controls {
+    height: 56px;
+    padding: 0 16px;
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, #1d1d21 0%, #18181b 100%);
+    border-bottom: 1px solid #26262c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    flex-wrap: wrap;
+}
+
+.brand {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #ff3b5c;
+    font-size: 15px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.home-link {
+    color: #a0a0ab;
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.home-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.controls-center {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex: 1;
+}
+
+.sync-btn {
+    flex-shrink: 0;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 20px;
+    border-left: 1px solid #2a2a30;
+    flex-wrap: wrap;
+}
+
+.control-group:first-of-type {
+    border-left: 1px solid #2a2a30;
+}
+
+input, select, button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+}
+
+input {
+    background: #1f1f23;
+    color: white;
+    border: 1px solid #2f2f35;
+    transition: border-color 0.15s ease;
+    width: 140px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff3b5c;
+}
+
+select {
+    background: #1f1f23;
+    color: white;
+    border: 1px solid #2f2f35;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+select:hover {
+    border-color: #3f3f47;
+}
+
+button {
+    background: #ff3b5c;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: #e02e4c;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button.secondary {
+    background: #2a2a30;
+}
+
+button.secondary:hover {
+    background: #35353d;
+}
+
+/* Grid dinámico: columnas/filas/áreas se calculan en JS según
+   el modo de vista (lado a lado / apilado) y los chats activos */
+.layout-container {
+    display: grid;
+    height: calc(100vh - 57px);
+    width: 100vw;
+}
+
+.stream-block {
+    display: flex;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.stream-iframe {
+    flex: 1;
+    height: 100%;
+    border: none;
+}
+
+.chat-iframe {
+    display: none;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #18181b;
+    border-left: 1px solid #26262c;
+}
+
+/* Asignación fija de cada elemento a su área del grid */
+#block1 { grid-area: s1; }
+#block2 { grid-area: s2; }
+#chat1  { grid-area: c1; }
+#chat2  { grid-area: c2; }
+
+/* En modo apilado, separa visualmente el stream de arriba del de abajo */
+.layout-container.stacked #block1 {
+    border-bottom: 1px solid #26262c;
+}
+
+/* Cuando ambos chats están activos, chat1 queda en el borde izquierdo:
+   el separador debe ir a su derecha, no a su izquierda (aplica en ambas vistas) */
+.layout-container[data-state="both"] #chat1 {
+    border-left: none;
+    border-right: 1px solid #26262c;
+}
