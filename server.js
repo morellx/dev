@@ -15,6 +15,7 @@ const io = new Server(server, {
 
 // Servir archivos estáticos (ajusta la carpeta si usas 'public' o la raíz)
 app.use(express.static(path.join(__dirname)));
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 let deathState = {
   p1: { deaths: 0, username: 'Steve' },
