@@ -6,15 +6,29 @@ function loadStreams() {
     const s1 = document.getElementById('streamer1').value.trim();
     const s2 = document.getElementById('streamer2').value.trim();
 
-    if (s1 && s1 !== currentS1) {
-        currentS1 = s1;
-        document.getElementById('player1').src =
-            `https://player.twitch.tv/?channel=${s1}&parent=${parentDomain}&muted=true`;
+    const p1 = document.getElementById('player1');
+    const p2 = document.getElementById('player2');
+
+    // Manejo Streamer 1
+    if (s1) {
+        if (s1 !== currentS1) {
+            currentS1 = s1;
+            p1.src = `https://player.twitch.tv/?channel=${s1}&parent=${parentDomain}&muted=true`;
+        }
+    } else {
+        currentS1 = '';
+        p1.src = '';
     }
-    if (s2 && s2 !== currentS2) {
-        currentS2 = s2;
-        document.getElementById('player2').src =
-            `https://player.twitch.tv/?channel=${s2}&parent=${parentDomain}&muted=true`;
+
+    // Manejo Streamer 2
+    if (s2) {
+        if (s2 !== currentS2) {
+            currentS2 = s2;
+            p2.src = `https://player.twitch.tv/?channel=${s2}&parent=${parentDomain}&muted=true`;
+        }
+    } else {
+        currentS2 = '';
+        p2.src = '';
     }
 
     updateSelectLabels();
@@ -22,8 +36,6 @@ function loadStreams() {
 }
 
 function syncStreams() {
-    // Recarga ambos reproductores al mismo tiempo, con el mismo timestamp,
-    // para que ambos streams queden alineados/sincronizados entre sí.
     const timestamp = Date.now();
 
     if (currentS1) {
@@ -44,12 +56,26 @@ function updateSelectLabels() {
     opt2.textContent = currentS2 ? `Chat de ${currentS2}` : 'Chat 2';
 }
 
-// Devuelve la plantilla de grid (columnas, filas, áreas) según
-// el modo de vista ("side" | "stack") y el estado de los chats
-// ("none" | "chat1" | "chat2" | "both").
 function getGridTemplate(mode, state) {
     const CHAT = '320px';
 
+    // CASO 1: Solo Streamer 1 está activo
+    if (currentS1 && !currentS2) {
+        if (state === 'chat1' || state === 'both') {
+            return { columns: `1fr ${CHAT}`, rows: '1fr', areas: ['s1 c1'] };
+        }
+        return { columns: '1fr', rows: '1fr', areas: ['s1'] };
+    }
+
+    // CASO 2: Solo Streamer 2 está activo
+    if (!currentS1 && currentS2) {
+        if (state === 'chat2' || state === 'both') {
+            return { columns: `1fr ${CHAT}`, rows: '1fr', areas: ['s2 c2'] };
+        }
+        return { columns: '1fr', rows: '1fr', areas: ['s2'] };
+    }
+
+    // CASO 3: Ambos activos
     if (mode === 'side') {
         switch (state) {
             case 'chat1':
@@ -57,21 +83,19 @@ function getGridTemplate(mode, state) {
             case 'chat2':
                 return { columns: `1fr ${CHAT} 1fr`, rows: '1fr', areas: ['s1 c2 s2'] };
             case 'both':
-                // chat1 en el costado izquierdo, ambos streams al centro, chat2 en el costado derecho
                 return { columns: `${CHAT} 1fr 1fr ${CHAT}`, rows: '1fr', areas: ['c1 s1 s2 c2'] };
             default:
                 return { columns: '1fr 1fr', rows: '1fr', areas: ['s1 s2'] };
         }
     }
 
-    // mode === 'stack': streams uno debajo del otro, chat fijo a la derecha
+    // mode === 'stack'
     switch (state) {
         case 'chat1':
             return { columns: `1fr ${CHAT}`, rows: '1fr 1fr', areas: ['s1 c1', 's2 c1'] };
         case 'chat2':
             return { columns: `1fr ${CHAT}`, rows: '1fr 1fr', areas: ['s1 c2', 's2 c2'] };
         case 'both':
-            // chat1 a toda altura en el costado izquierdo, chat2 a toda altura en el derecho
             return { columns: `${CHAT} 1fr ${CHAT}`, rows: '1fr 1fr', areas: ['c1 s1 c2', 'c1 s2 c2'] };
         default:
             return { columns: '1fr', rows: '1fr 1fr', areas: ['s1', 's2'] };
@@ -82,8 +106,14 @@ function applyLayout() {
     const chatOption = document.getElementById('chatOption').value;
     const layoutMode = document.getElementById('layoutMode').value;
     const container = document.getElementById('layoutContainer');
+    const block1 = document.getElementById('block1');
+    const block2 = document.getElementById('block2');
     const chat1Frame = document.getElementById('chat1');
     const chat2Frame = document.getElementById('chat2');
+
+    // Mostrar/Ocultar bloques según si tienen canal
+    block1.style.display = currentS1 ? 'flex' : 'none';
+    block2.style.display = currentS2 ? 'flex' : 'none';
 
     const setChatSrc = (frame, streamer) => {
         const targetUrl = `https://www.twitch.tv/embed/${streamer}/chat?parent=${parentDomain}&darkpopout`;
@@ -120,7 +150,7 @@ function applyLayout() {
     container.style.gridTemplateRows = rows;
     container.style.gridTemplateAreas = areas.map(row => `"${row}"`).join(' ');
 
-    container.classList.toggle('stacked', layoutMode === 'stack');
+    container.classList.toggle('stacked', layoutMode === 'stack' && currentS1 && currentS2);
     container.dataset.state = state;
 }
 

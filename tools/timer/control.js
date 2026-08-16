@@ -131,27 +131,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  btnReset.addEventListener('click', () => {
+  btnReset.addEventListener('click', () => {  
     pauseTimer();
-    const mode = timerModeSelect.value;
-    remainingSeconds = mode === 'countdown' ? getSecondsFromInput() : 0;
+    remainingSeconds = getSecondsFromInput(); // Reinicia al tiempo configurado en las casillas
     syncState();
   });
 
-  [inputHours, inputMinutes, inputSeconds].forEach(inp => {
+ [inputHours, inputMinutes, inputSeconds].forEach(inp => {
     inp.addEventListener('input', () => {
-      if (!isRunning && timerModeSelect.value === 'countdown') {
+      if (!isRunning) {
         remainingSeconds = getSecondsFromInput();
         syncState();
       }
     });
   });
 
-  timerModeSelect.addEventListener('change', () => {
+timerModeSelect.addEventListener('change', () => {
     pauseTimer();
-    remainingSeconds = timerModeSelect.value === 'countdown' ? getSecondsFromInput() : 0;
+    remainingSeconds = getSecondsFromInput(); 
     syncState();
-  });
+  });;
 
   showLabelsInput.addEventListener('change', syncState);
 
