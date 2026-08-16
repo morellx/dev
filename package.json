@@ -7,6 +7,10 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@twurple/api": "^8.1.4",
+    "@twurple/auth": "^8.1.4",
+    "@twurple/eventsub-ws": "^8.1.4",
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   }
