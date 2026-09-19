@@ -4,11 +4,19 @@ if (typeof io !== 'undefined') {
   socket = io();
 }
 
+// Obtener el ID del temporizador desde la URL (Ej: control.html?id=timer2)
+const urlParams = new URLSearchParams(window.location.search);
+const timerId = urlParams.get('id') || 'timer1';
+
 let timerInterval = null;
 let isRunning = false;
 let remainingSeconds = 600;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Mostrar visualmente el ID actual en el título si existe el elemento
+  const idLabel = document.getElementById('timerIdLabel');
+  if (idLabel) idLabel.textContent = `[${timerId}]`;
+
   // Inicialización de elementos del DOM tras la carga del HTML
   const timerModeSelect = document.getElementById('timerMode');
   const inputHours = document.getElementById('inputHours');
@@ -32,6 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentAlignment = 'left';
   let isBold = true;
 
+  // Solicitar estado inicial al servidor para este ID
+  if (socket) {
+    socket.emit('get_status', timerId);
+  }
+
   function getSecondsFromInput() {
     const h = parseInt(inputHours.value, 10) || 0;
     const m = parseInt(inputMinutes.value, 10) || 0;
@@ -52,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function syncState() {
+  function syncState(action = 'sync') {
     const formattedText = getFormattedTime();
 
     // 1. Actualización en la interfaz local
@@ -72,18 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 2. Transmisión a WebSocket si está activo
+    // 2. Transmisión a WebSocket incluyendo el timerId y la acción
     if (socket && socket.connected) {
       try {
         socket.emit('update_timer', {
-          formattedText,
-          align: currentAlignment,
-          color: textColorInput.value,
-          size: fontSizeInput.value,
-          bold: isBold,
-          shadow: enableShadowInput.checked,
-          shadowDist: shadowDistInput.value,
-          shadowBlur: shadowBlurInput.value
+          timerId: timerId,
+          action: action,
+          config: {
+            seconds: remainingSeconds,
+            mode: timerModeSelect.value,
+            formattedText,
+            align: currentAlignment,
+            color: textColorInput.value,
+            size: fontSizeInput.value,
+            bold: isBold,
+            shadow: enableShadowInput.checked,
+            shadowDist: shadowDistInput.value,
+            shadowBlur: shadowBlurInput.value
+          }
         });
       } catch (err) {
         console.warn('Error al transmitir evento vía Socket:', err);
@@ -91,90 +110,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function startTimer() {
-    if (isRunning) return;
-    isRunning = true;
-    btnPlayPause.innerHTML = '⏸ Pausar';
-    btnPlayPause.style.backgroundColor = 'var(--red-hover)';
-
-    timerInterval = setInterval(() => {
-      const mode = timerModeSelect.value;
-      if (mode === 'countdown') {
-        if (remainingSeconds > 0) {
-          remainingSeconds--;
-          syncState();
-        } else {
-          pauseTimer();
-          timerDisplay.innerText = "¡TIEMPO!";
-          syncState();
-        }
-      } else {
-        remainingSeconds++;
-        syncState();
-      }
-    }, 1000);
-  }
-
-  function pauseTimer() {
-    isRunning = false;
-    clearInterval(timerInterval);
-    btnPlayPause.innerHTML = '▶ Iniciar';
-    btnPlayPause.style.backgroundColor = 'var(--red-accent)';
-  }
-
   // --- Asignación de Listeners de Eventos ---
   btnPlayPause.addEventListener('click', () => {
-    if (isRunning) {
-      pauseTimer();
-    } else {
-      startTimer();
-    }
+    // Alternamos el estado local y enviamos la acción de toggle al servidor
+    syncState('toggle');
   });
 
   btnReset.addEventListener('click', () => {  
-    pauseTimer();
-    remainingSeconds = getSecondsFromInput(); // Reinicia al tiempo configurado en las casillas
-    syncState();
+    remainingSeconds = getSecondsFromInput(); 
+    syncState('reset');
   });
 
- [inputHours, inputMinutes, inputSeconds].forEach(inp => {
+  [inputHours, inputMinutes, inputSeconds].forEach(inp => {
     inp.addEventListener('input', () => {
       if (!isRunning) {
         remainingSeconds = getSecondsFromInput();
-        syncState();
+        syncState('config');
       }
     });
   });
 
-timerModeSelect.addEventListener('change', () => {
-    pauseTimer();
+  timerModeSelect.addEventListener('change', () => {
     remainingSeconds = getSecondsFromInput(); 
-    syncState();
-  });;
+    syncState('config');
+  });
 
-  showLabelsInput.addEventListener('change', syncState);
+  showLabelsInput.addEventListener('change', () => syncState('config'));
 
   alignButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       alignButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentAlignment = btn.dataset.align;
-      syncState();
+      syncState('config');
     });
   });
 
   btnBold.addEventListener('click', () => {
     isBold = !isBold;
     btnBold.classList.toggle('active', isBold);
-    syncState();
+    syncState('config');
   });
 
   [textColorInput, fontSizeInput, enableShadowInput, shadowDistInput, shadowBlurInput].forEach(elem => {
-    elem.addEventListener('input', syncState);
-    elem.addEventListener('change', syncState);
+    elem.addEventListener('input', () => syncState('config'));
+    elem.addEventListener('change', () => syncState('config'));
   });
+
+  // Escuchar la sincronización exclusiva para este timerId desde el servidor
+  if (socket) {
+    socket.on(`sync_timer_${timerId}`, (data) => {
+      if (data.seconds !== undefined) remainingSeconds = data.seconds;
+      if (data.formattedText && timerDisplay) timerDisplay.innerText = data.formattedText;
+      
+      if (data.running !== undefined) {
+        isRunning = data.running;
+        if (isRunning) {
+          btnPlayPause.innerHTML = '⏸ Pausar';
+          btnPlayPause.style.backgroundColor = 'var(--red-hover)';
+        } else {
+          btnPlayPause.innerHTML = '▶ Iniciar';
+          btnPlayPause.style.backgroundColor = 'var(--red-accent)';
+        }
+      }
+
+      if (data.color && textColorInput) textColorInput.value = data.color;
+      if (data.size && fontSizeInput) fontSizeInput.value = data.size;
+      if (data.mode && timerModeSelect) timerModeSelect.value = data.mode;
+    });
+  }
 
   // Ejecución inicial al cargar
   remainingSeconds = getSecondsFromInput();
-  syncState();
+  syncState('config');
 });

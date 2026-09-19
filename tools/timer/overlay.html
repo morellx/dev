@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Overlay OBS</title>
   <link rel="stylesheet" href="style.css">
-  <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <style>
     body {
@@ -27,7 +26,15 @@
     const socket = io();
     const timerDisplay = document.getElementById('timerDisplay');
 
-    socket.on('sync_timer', (data) => {
+    // Obtener el ID del temporizador desde la URL (Ej: overlay_2.html?id=timer2)
+    const urlParams = new URLSearchParams(window.location.search);
+    const timerId = urlParams.get('id') || 'timer1';
+
+    // Pedir el estado inicial al servidor al conectar
+    socket.emit('get_status', timerId);
+
+    // Escuchar únicamente los eventos sincronizados para este timerId
+    socket.on(`sync_timer_${timerId}`, (data) => {
       if (data.formattedText) timerDisplay.innerText = data.formattedText;
       if (data.color) timerDisplay.style.color = data.color;
       if (data.size) timerDisplay.style.fontSize = `${data.size}px`;
@@ -42,6 +49,3 @@
   </script>
 </body>
 </html>
-
-
-
