@@ -1,156 +1,180 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+// Manejo seguro de Socket.IO
+let socket = null;
+if (typeof io !== 'undefined') {
+  socket = io();
+}
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+let timerInterval = null;
+let isRunning = false;
+let remainingSeconds = 600;
 
-// Servir archivos estáticos desde la carpeta actual (ajusta si tus archivos están en otra ruta)
-app.use(express.static(path.join(__dirname)));
+document.addEventListener('DOMContentLoaded', () => {
+  // Inicialización de elementos del DOM tras la carga del HTML
+  const timerModeSelect = document.getElementById('timerMode');
+  const inputHours = document.getElementById('inputHours');
+  const inputMinutes = document.getElementById('inputMinutes');
+  const inputSeconds = document.getElementById('inputSeconds');
+  const btnPlayPause = document.getElementById('btnPlayPause');
+  const btnReset = document.getElementById('btnReset');
+  const showLabelsInput = document.getElementById('showLabels');
 
-// Objeto en memoria para almacenar múltiples temporizadores de forma independiente
-const activeTimers = {};
+  const textColorInput = document.getElementById('textColor');
+  const fontSizeInput = document.getElementById('fontSize');
+  const btnBold = document.getElementById('btnBold');
+  const enableShadowInput = document.getElementById('enableShadow');
+  const shadowDistInput = document.getElementById('shadowDist');
+  const shadowBlurInput = document.getElementById('shadowBlur');
+  const alignButtons = document.querySelectorAll('.btn-align');
 
-io.on('connection', (socket) => {
-  console.log('Cliente conectado:', socket.id);
+  const overlayContainer = document.getElementById('overlayContainer');
+  const timerDisplay = document.getElementById('timerDisplay');
 
-  // 1. Cuando un cliente (control u overlay) solicita el estado inicial
-  socket.on('get_status', (timerId) => {
-    if (!timerId) return;
+  let currentAlignment = 'left';
+  let isBold = true;
 
-    if (!activeTimers[timerId]) {
-      activeTimers[timerId] = {
-        seconds: 600, // Por defecto 10 minutos (600 segundos)
-        running: false,
-        mode: 'countdown',
-        interval: null,
-        color: '#ffffff',
-        size: 48,
-        bold: true,
-        shadow: true,
-        shadowDist: 4,
-        shadowBlur: 4,
-        showLabels: true
-      };
-    }
-
-    // Enviar el estado actual únicamente a este cliente
-    socket.emit(`sync_timer_${timerId}`, getPublicState(activeTimers[timerId]));
-  });
-
-  // 2. Manejar acciones (Iniciar/Pausar, Reiniciar, Cambiar configuración)
-  socket.on('update_timer', (data) => {
-    const { timerId, action, config } = data;
-    if (!timerId) return;
-
-    if (!activeTimers[timerId]) {
-      activeTimers[timerId] = {
-        seconds: 600,
-        running: false,
-        mode: 'countdown',
-        interval: null,
-        color: '#ffffff',
-        size: 48,
-        bold: true,
-        shadow: true,
-        shadowDist: 4,
-        shadowBlur: 4,
-        showLabels: true
-      };
-    }
-
-    const timer = activeTimers[timerId];
-
-    // Actualizar configuración visual o de tiempo si viene en el paquete
-    if (config) {
-      if (config.seconds !== undefined && !timer.running) timer.seconds = config.seconds;
-      if (config.mode !== undefined) timer.mode = config.mode;
-      if (config.color !== undefined) timer.color = config.color;
-      if (config.size !== undefined) timer.size = config.size;
-      if (config.bold !== undefined) timer.bold = config.bold;
-      if (config.shadow !== undefined) timer.shadow = config.shadow;
-      if (config.shadowDist !== undefined) timer.shadowDist = config.shadowDist;
-      if (config.shadowBlur !== undefined) timer.shadowBlur = config.shadowBlur;
-      if (config.showLabels !== undefined) timer.showLabels = config.showLabels;
-    }
-
-    // Lógica para Iniciar / Pausar (Toggle)
-    if (action === 'toggle') {
-      timer.running = !timer.running;
-
-      if (timer.running) {
-        if (timer.interval) clearInterval(timer.interval);
-
-        timer.interval = setInterval(() => {
-          if (timer.mode === 'countdown') {
-            if (timer.seconds > 0) {
-              timer.seconds--;
-            } else {
-              timer.running = false;
-              clearInterval(timer.interval);
-            }
-          } else {
-            timer.seconds++;
-          }
-          // Transmitir a todos los conectados a este timerId específico
-          io.emit(`sync_timer_${timerId}`, getPublicState(timer));
-        }, 1000);
-      } else {
-        clearInterval(timer.interval);
-      }
-    } 
-    // Lógica para Reiniciar
-    else if (action === 'reset') {
-      timer.running = false;
-      clearInterval(timer.interval);
-      if (config && config.seconds !== undefined) {
-        timer.seconds = config.seconds;
-      }
-    }
-
-    // Transmitir el estado actualizado a todos los clientes de este timerId (paneles y overlays)
-    io.emit(`sync_timer_${timerId}`, getPublicState(timer));
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado:', socket.id);
-  });
-});
-
-// Funciones auxiliares de formato
-function formatTime(totalSeconds, showLabels = true) {
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  const pad = (n) => String(n).padStart(2, '0');
-
-  if (showLabels) {
-    return h > 0 ? `${pad(h)}h ${pad(m)}m ${pad(s)}s` : `${pad(m)}m ${pad(s)}s`;
-  } else {
-    return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  function getSecondsFromInput() {
+    const h = parseInt(inputHours.value, 10) || 0;
+    const m = parseInt(inputMinutes.value, 10) || 0;
+    const s = parseInt(inputSeconds.value, 10) || 0;
+    return (h * 3600) + (m * 60) + s;
   }
-}
 
-function getPublicState(timer) {
-  return {
-    seconds: timer.seconds,
-    formattedText: formatTime(timer.seconds, timer.showLabels),
-    running: timer.running,
-    mode: timer.mode,
-    color: timer.color,
-    size: timer.size,
-    bold: timer.bold,
-    shadow: timer.shadow,
-    shadowDist: timer.shadowDist,
-    shadowBlur: timer.shadowBlur,
-    showLabels: timer.showLabels
-  };
-}
+  function getFormattedTime() {
+    const h = Math.floor(remainingSeconds / 3600);
+    const m = Math.floor((remainingSeconds % 3600) / 60);
+    const s = remainingSeconds % 60;
+    const pad = (n) => String(n).padStart(2, '0');
 
-// Configuración de puerto compatible con Railway y entorno local
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Servidor de temporizadores corriendo en el puerto ${PORT}`);
+    if (showLabelsInput.checked) {
+      return h > 0 ? `${pad(h)}h ${pad(m)}m ${pad(s)}s` : `${pad(m)}m ${pad(s)}s`;
+    } else {
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    }
+  }
+
+  function syncState() {
+    const formattedText = getFormattedTime();
+
+    // 1. Actualización en la interfaz local
+    if (timerDisplay && overlayContainer) {
+      timerDisplay.innerText = formattedText;
+      overlayContainer.style.textAlign = currentAlignment;
+      timerDisplay.style.color = textColorInput.value;
+      timerDisplay.style.fontSize = `${fontSizeInput.value}px`;
+      timerDisplay.style.fontWeight = isBold ? 'bold' : 'normal';
+
+      if (enableShadowInput.checked) {
+        const dist = shadowDistInput.value;
+        const blur = shadowBlurInput.value;
+        timerDisplay.style.textShadow = `-${dist}px ${dist}px ${blur}px rgba(0, 0, 0, 0.8)`;
+      } else {
+        timerDisplay.style.textShadow = 'none';
+      }
+    }
+
+    // 2. Transmisión a WebSocket si está activo
+    if (socket && socket.connected) {
+      try {
+        socket.emit('update_timer', {
+          formattedText,
+          align: currentAlignment,
+          color: textColorInput.value,
+          size: fontSizeInput.value,
+          bold: isBold,
+          shadow: enableShadowInput.checked,
+          shadowDist: shadowDistInput.value,
+          shadowBlur: shadowBlurInput.value
+        });
+      } catch (err) {
+        console.warn('Error al transmitir evento vía Socket:', err);
+      }
+    }
+  }
+
+  function startTimer() {
+    if (isRunning) return;
+    isRunning = true;
+    btnPlayPause.innerHTML = '⏸ Pausar';
+    btnPlayPause.style.backgroundColor = 'var(--red-hover)';
+
+    timerInterval = setInterval(() => {
+      const mode = timerModeSelect.value;
+      if (mode === 'countdown') {
+        if (remainingSeconds > 0) {
+          remainingSeconds--;
+          syncState();
+        } else {
+          pauseTimer();
+          timerDisplay.innerText = "¡TIEMPO!";
+          syncState();
+        }
+      } else {
+        remainingSeconds++;
+        syncState();
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    btnPlayPause.innerHTML = '▶ Iniciar';
+    btnPlayPause.style.backgroundColor = 'var(--red-accent)';
+  }
+
+  // --- Asignación de Listeners de Eventos ---
+  btnPlayPause.addEventListener('click', () => {
+    if (isRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  });
+
+  btnReset.addEventListener('click', () => {  
+    pauseTimer();
+    remainingSeconds = getSecondsFromInput(); // Reinicia al tiempo configurado en las casillas
+    syncState();
+  });
+
+ [inputHours, inputMinutes, inputSeconds].forEach(inp => {
+    inp.addEventListener('input', () => {
+      if (!isRunning) {
+        remainingSeconds = getSecondsFromInput();
+        syncState();
+      }
+    });
+  });
+
+timerModeSelect.addEventListener('change', () => {
+    pauseTimer();
+    remainingSeconds = getSecondsFromInput(); 
+    syncState();
+  });;
+
+  showLabelsInput.addEventListener('change', syncState);
+
+  alignButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      alignButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAlignment = btn.dataset.align;
+      syncState();
+    });
+  });
+
+  btnBold.addEventListener('click', () => {
+    isBold = !isBold;
+    btnBold.classList.toggle('active', isBold);
+    syncState();
+  });
+
+  [textColorInput, fontSizeInput, enableShadowInput, shadowDistInput, shadowBlurInput].forEach(elem => {
+    elem.addEventListener('input', syncState);
+    elem.addEventListener('change', syncState);
+  });
+
+  // Ejecución inicial al cargar
+  remainingSeconds = getSecondsFromInput();
+  syncState();
 });
