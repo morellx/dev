@@ -11,7 +11,9 @@
     "@twurple/auth": "^8.1.4",
     "@twurple/eventsub-ws": "^8.1.4",
     "dotenv": "^17.4.2",
-    "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "express": "^4.22.2",
+    "socket.io": "^4.8.3",
+    "tmi.js": "^1.8.5",
+    "ws": "^8.21.3"
   }
 }

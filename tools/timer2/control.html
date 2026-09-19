@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Temporizador OBS</title>
+
+  <!-- Hoja de estilos de la aplicación -->
+  <link rel="stylesheet" href="style.css">
+  <!-- CDN para Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Carga de Socket.IO vía CDN confiable -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <!-- Barra Superior / Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <a href="../../index.html" class="brand-logo">
+        <i class="fa-brands fa-twitch"></i> Fauni Bot
+      </a>
+      <nav class="nav-menu">
+        <a href="../../index.html" class="nav-link">Inicio</a>
+        
+        <!-- Desplegable Tools -->
+        <div class="dropdown">
+          <button class="dropbtn">
+            Tools <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="dropdown-content">
+            <a href="tools/timer/control.html" class="active"><i class="fa-solid fa-stopwatch"></i>Timer</a>
+            <a href="../contador_muertes/control.html"><i class="fa-solid fa-skull"></i> Contador de muertes</a>
+          </div>
+        </div>
+        <a href="/emotes/emotes_canal/" class="nav-link">Emotes del canal
+        <!-- Enlace Multi Twitch -->
+        <a href="../../multitwitch/" class="nav-link">Multi Twitch</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenido de la Página -->
+  <div class="page-content">
+    <div class="app-wrapper">
+      <div class="config-panel">
+        <h2>Control de Temporizador</h2>
+        <p class="subtitle">Controla el tiempo en tiempo real para OBS</p>
+
+        <div class="form-group">
+          <label>MODO DE TEMPORIZADOR</label>
+          <div class="row">
+            <select id="timerMode">
+              <option value="countdown">Temporizador (Cuenta regresiva)</option>
+              <option value="stopwatch">Cronómetro (Cuenta progresiva)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>CONFIGURACIÓN DE TIEMPO</label>
+          <div class="row">
+            <div class="input-col">
+              <span class="sublabel">HORAS</span>
+              <input type="number" id="inputHours" value="0" min="0" max="99">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">MINUTOS</span>
+              <input type="number" id="inputMinutes" value="10" min="0" max="59">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">SEGUNDOS</span>
+              <input type="number" id="inputSeconds" value="0" min="0" max="59">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="row" style="margin-top: 8px;">
+            <button type="button" id="btnPlayPause" class="btn-control primary">▶ Iniciar</button>
+            <button type="button" id="btnReset" class="btn-control danger">↻ Reiniciar</button>
+          </div>
+        </div>
+
+        <div class="form-group row-toggle">
+          <label for="showLabels">Mostrar etiquetas (h, m, s)</label>
+          <input type="checkbox" id="showLabels" checked>
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+          <label>PERSONALIZACIÓN VISUAL</label>
+          <div class="row">
+            <div class="input-col">
+              <span class="sublabel">COLOR</span>
+              <input type="color" id="textColor" value="#ffffff">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">TAMAÑO (PX)</span>
+              <input type="number" id="fontSize" value="48" min="12" max="120">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">ESTILO</span>
+              <button type="button" id="btnBold" class="btn-toggle active">B</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="row-toggle">
+            <label for="enableShadow">SOMBRA (SHADOW)</label>
+            <input type="checkbox" id="enableShadow" checked>
+          </div>
+          <div class="row" id="shadowOptions" style="margin-top: 8px;">
+            <div class="input-col">
+              <span class="sublabel">DIST (PX)</span>
+              <input type="number" id="shadowDist" value="4" min="0" max="20">
+            </div>
+            <div class="input-col">
+              <span class="sublabel">BLUR (PX)</span>
+              <input type="number" id="shadowBlur" value="4" min="0" max="20">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <h3>VISTA PREVIA DE OVERLAY</h3>
+        <p class="subtitle">Así es como se verá en vivo dentro de OBS</p>
+        <div class="preview-box">
+          <div id="overlayContainer" class="overlay-container">
+            <div id="timerDisplay" class="timer-display">00h 10m 00s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="control.js"></script>
+</body>
+</html>
